@@ -28,8 +28,8 @@
 # Imports
 # --------------------------------------------------------------------------- #
 
-from bottle import Bottle
 from typing import Dict
+from bottle import Bottle
 
 # --------------------------------------------------------------------------- #
 # Application
