@@ -24,26 +24,41 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Modules
-PyYaml
+# --------------------------------------------------------------------------- #
+# Imports
+# --------------------------------------------------------------------------- #
 
-# Version
-bump2version
+from functools import wraps
 
-# Doc
-pdoc3
+import pystache
 
-# Lint
-pylint
+from .loader import Templates
 
-# Http Framework
-bottle
+# --------------------------------------------------------------------------- #
+# Load Templates
+# --------------------------------------------------------------------------- #
 
-# Http Client
-urllib3
+TEMPLATES = Templates().loads()
 
-# JSON
-ujson
+# --------------------------------------------------------------------------- #
+# Template Decorator View
+# --------------------------------------------------------------------------- #
 
-# Templates
-pystache
+def template(name):
+    """ Mustache Render Template """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            return pystache.render(TEMPLATES[name], **result)
+
+        return wrapper
+
+    return decorator
+
+# --------------------------------------------------------------------------- #
+# END
+# --------------------------------------------------------------------------- #
+
+# EOF

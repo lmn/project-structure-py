@@ -31,6 +31,9 @@
 from typing import Dict
 from bottle import Bottle
 
+# Templates
+from .utils import template
+
 # --------------------------------------------------------------------------- #
 # Application
 # --------------------------------------------------------------------------- #
@@ -40,6 +43,11 @@ app = Bottle()
 @app.get('/status')
 def status() -> Dict:
     return dict(status='up', version=1)
+
+@app.get('/hello/<name>')
+@template('hello')
+def hello(name) -> Dict:
+    return dict(name=name)
 
 # --------------------------------------------------------------------------- #
 # END
