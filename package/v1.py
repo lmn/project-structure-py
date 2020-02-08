@@ -25,35 +25,22 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # --------------------------------------------------------------------------- #
-# Rules
+# Imports
 # --------------------------------------------------------------------------- #
 
-venv:
-	@python -m venv venv/
+import bottle
 
-install:
-	@pip install invoke
+# --------------------------------------------------------------------------- #
+# Application
+# --------------------------------------------------------------------------- #
 
-deps:
-	@invoke deps
+app = bottle.Bottle()
 
-lint:
-	@inv lint
 
-docs:
-	@inv docs
+@app.get("/status")
+def status():
+    return dict(status="up", version=1)
 
-syntax:
-	@inv black
-
-flake:
-	@inv flake
-
-unittest:
-	@inv unittest
-
-funtest:
-	@inv funtest
 
 # --------------------------------------------------------------------------- #
 # END

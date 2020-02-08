@@ -30,20 +30,23 @@ PyYaml
 # Version
 bump2version
 
-# Doc
-pdoc3
+# Syntax
+black
 
 # Lint
 pylint
+flake8
 
 # Http Framework
 bottle
 
 # Http Client
-urllib3
-
-# JSON
-ujson
+requests
 
 # Templates
 pystache
+
+# Test
+webtest
+nose
+coverage

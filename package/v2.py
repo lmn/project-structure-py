@@ -25,35 +25,35 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # --------------------------------------------------------------------------- #
-# Rules
+# Imports
 # --------------------------------------------------------------------------- #
 
-venv:
-	@python -m venv venv/
+import bottle
 
-install:
-	@pip install invoke
+from package.utils.utils import template
 
-deps:
-	@invoke deps
+# --------------------------------------------------------------------------- #
+# Application
+# --------------------------------------------------------------------------- #
 
-lint:
-	@inv lint
+app = bottle.Bottle()
 
-docs:
-	@inv docs
 
-syntax:
-	@inv black
+@app.get("/status")
+def status():
+    return dict(status="up", version=2)
 
-flake:
-	@inv flake
 
-unittest:
-	@inv unittest
+@app.get("/hello/<name>")
+@template("hello")
+def hello(name):
+    return dict(name=name)
 
-funtest:
-	@inv funtest
+
+@app.error(404)
+def not_found():
+    return "Not Found"
+
 
 # --------------------------------------------------------------------------- #
 # END

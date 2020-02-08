@@ -25,35 +25,58 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # --------------------------------------------------------------------------- #
-# Rules
+# Imports
 # --------------------------------------------------------------------------- #
 
-venv:
-	@python -m venv venv/
+import bottle
 
-install:
-	@pip install invoke
+from functools import wraps
 
-deps:
-	@invoke deps
+import pystache
 
-lint:
-	@inv lint
+from package.utils.loader import Templates
 
-docs:
-	@inv docs
+# --------------------------------------------------------------------------- #
+# Load Templates
+# --------------------------------------------------------------------------- #
 
-syntax:
-	@inv black
+TEMPLATES = Templates().loads()
 
-flake:
-	@inv flake
+# --------------------------------------------------------------------------- #
+# Template Decorator View
+# --------------------------------------------------------------------------- #
 
-unittest:
-	@inv unittest
 
-funtest:
-	@inv funtest
+def template(name):
+    """ Mustache Render Template """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            return pystache.render(TEMPLATES[name], **result)
+
+        return wrapper
+
+    return decorator
+
+
+def auth_required(f):
+    """ Authenticate Request """
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = bottle.request.headers.get("Auth", False)
+
+        if not token:
+            msg = dict(error="Please authenticate.")
+            bottle.response.status = 403
+            return msg
+
+        return f(*args, **kwargs)
+
+    return decorated
+
 
 # --------------------------------------------------------------------------- #
 # END

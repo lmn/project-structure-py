@@ -28,34 +28,43 @@
 # Imports
 # --------------------------------------------------------------------------- #
 
-from functools import wraps
-
-import pystache
-
-from .loader import Templates
+from typing import Dict
+import glob
+import yaml
 
 # --------------------------------------------------------------------------- #
-# Load Templates
+# Loader Configuration
 # --------------------------------------------------------------------------- #
 
-TEMPLATES = Templates().loads()
+
+class Loader:
+    """ Main Configuration Loader """
+
+    config = yaml.safe_load(open("config.yml", mode="r").read())
+
+    def configuration(self) -> Dict:
+        """ Return Configuration Dict """
+        return self.config
+
 
 # --------------------------------------------------------------------------- #
-# Template Decorator View
+# Generate Template Dict
 # --------------------------------------------------------------------------- #
 
-def template(name):
-    """ Mustache Render Template """
 
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            result = func(*args, **kwargs)
-            return pystache.render(TEMPLATES[name], **result)
+class Templates(Loader):
+    """ Template Get Files From Directory """
 
-        return wrapper
+    def loads(self) -> Dict:
+        """ Generate Template List """
+        result = dict()
+        tpl_files = glob.glob(f"{self.config['templates']}/**.tpl")
+        for tmp in tpl_files:
+            # Template Key
+            aux = tmp.split("/")[-1].split(".")[0]
+            result[aux] = open(tmp, mode="r").read()
+        return result
 
-    return decorator
 
 # --------------------------------------------------------------------------- #
 # END

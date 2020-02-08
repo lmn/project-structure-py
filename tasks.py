@@ -43,31 +43,34 @@ DEPENDENCIES = "deps.txt"
 # App Tasks
 # --------------------------------------------------------------------------- #
 
-@task
-def play(ctx, mode='development'):
-    """ Start Application """
-    from package import app
-    from package.loader import config
-    from bottle import run
 
-    if mode in config['api']:
+@task
+def play(ctx, mode="development"):
+    """ Start Application """
+    import bottle
+    from package.utils.loader import config
+
+    if mode in config["api"]:
         print(f"Starting with {config['api'][mode]}")
 
         # https://docs.python.org/3/library/tracemalloc.html
-        if mode == 'development':
+        if mode == "development":
             import tracemalloc
+
             tracemalloc.start()
 
         # Start App
-        run(app, **config['api'][mode])
+        bottle.run(bottle.load_app("package.main:app"), **config["api"][mode])
 
     # Default Message
     else:
-        print(f"Please verify {mode} under config.yml")
+        print(f"Please {mode} key under config.yml")
+
 
 # --------------------------------------------------------------------------- #
-# Tasks
+# Docs / Dependencies
 # --------------------------------------------------------------------------- #
+
 
 @task
 def deps(ctx):
@@ -75,11 +78,13 @@ def deps(ctx):
     print("Installing Dependencies")
     ctx.run(f"pip3 install -r {DEPENDENCIES}")
 
+
 @task
 def docs(ctx):
     """ Documentation Live Server"""
     print("Start Doc Server")
     ctx.run(f"pdoc --http : {PACKAGE_NAME}")
+
 
 @task
 def docs_build(ctx):
@@ -87,17 +92,51 @@ def docs_build(ctx):
     print("Start Doc Server")
     ctx.run(f"pdoc --http : {PACKAGE_NAME}")
 
+
+# --------------------------------------------------------------------------- #
+# Unit Functional Tests / Linting
+# --------------------------------------------------------------------------- #
+
 @task
-def lint(ctx):
-    """ Run PyLint """
-    files = glob.glob('*/**.py')
-    ctx.run("pylint {}".format(' '.join(files)))
+def black(ctx):
+    """ Run Black Syntax """
+    files = glob.glob("*/**.py")
+    ctx.run(f"black test/ {PACKAGE_NAME}/")
 
 @task
 def lint(ctx):
+    """ Run PyLint """
+    files = glob.glob("*/**.py")
+    ctx.run(f"black tests/ {PACKAGE_NAME}/")
+    ctx.run("pylint {}".format(" ".join(files)))
+
+
+@task
+def flake(ctx):
     """ Run Unit Test """
-    files = glob.glob('*/**.py')
-    ctx.run("pylint {}".format(' '.join(files)))
+    files = glob.glob("*/**.py")
+    ctx.run(f"black tests/ {PACKAGE_NAME}/")
+    ctx.run("flake8 {}".format(" ".join(files)))
+
+
+@task
+def unittest(ctx):
+    """ Run Unit Test """
+    ctx.run(f"black tests/ {PACKAGE_NAME}/")
+    ctx.run("nosetests --with-coverage"
+            " --cover-package={} -v tests/unit/".format(PACKAGE_NAME.lower()))
+
+@task
+def funtest(ctx):
+    """ Run Unit Test """
+    ctx.run(f"black tests/ {PACKAGE_NAME}/")
+    ctx.run("nosetests --with-coverage"
+            " --cover-package={} -v tests/functional/".format(PACKAGE_NAME.lower()))
+
+
+# --------------------------------------------------------------------------- #
+# Version
+# --------------------------------------------------------------------------- #
 
 @task
 def bump(ctx):
@@ -109,6 +148,7 @@ def bump(ctx):
         ctx.run("bumpversion patch")
     elif branch == "release":
         ctx.run("bumpversion major")
+
 
 # --------------------------------------------------------------------------- #
 # END
