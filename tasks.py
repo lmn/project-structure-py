@@ -48,7 +48,8 @@ DEPENDENCIES = "deps.txt"
 def play(ctx, mode="development"):
     """ Start Application """
     import bottle
-    from package.utils.loader import config
+    from package.utils.loader import Loader
+    config = Loader().configuration()
 
     if mode in config["api"]:
         print(f"Starting with {config['api'][mode]}")

@@ -36,8 +36,10 @@ import bottle
 # --------------------------------------------------------------------------- #
 
 app = bottle.Bottle()
+
 app.mount("/v1", bottle.load_app("package.v1:app"))
 app.mount("/v2", bottle.load_app("package.v2:app"))
+
 
 # --------------------------------------------------------------------------- #
 # END
