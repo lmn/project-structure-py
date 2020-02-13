@@ -50,3 +50,7 @@ pystache
 webtest
 nose
 coverage
+
+# Tasks
+huey
+gevent
