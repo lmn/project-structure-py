@@ -31,6 +31,7 @@
 import bottle
 
 from package.utils.utils import template
+from package.tasks import main
 
 # --------------------------------------------------------------------------- #
 # Application
@@ -48,6 +49,12 @@ def status():
 @template("hello")
 def hello(name):
     return dict(name=name)
+
+
+@app.get("/execute/<a>/<b>")
+def execute_task(a, b):
+    idx = getattr(main, "execute")(a, b)
+    return dict(id=str(idx.id))
 
 
 @app.error(404)

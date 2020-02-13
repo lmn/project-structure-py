@@ -31,7 +31,6 @@
 import glob
 from invoke import task
 
-
 # --------------------------------------------------------------------------- #
 # Settings
 # --------------------------------------------------------------------------- #
@@ -49,6 +48,8 @@ def play(ctx, mode="development"):
     """ Start Application """
     import bottle
     from package.utils.loader import Loader
+    from package.tasks import main
+
     config = Loader().configuration()
 
     if mode in config["api"]:
@@ -98,11 +99,13 @@ def docs_build(ctx):
 # Unit Functional Tests / Linting
 # --------------------------------------------------------------------------- #
 
+
 @task
 def black(ctx):
     """ Run Black Syntax """
     files = glob.glob("*/**.py")
     ctx.run(f"black test/ {PACKAGE_NAME}/")
+
 
 @task
 def lint(ctx):
@@ -120,24 +123,48 @@ def flake(ctx):
     ctx.run("flake8 {}".format(" ".join(files)))
 
 
+# --------------------------------------------------------------------------- #
+# Unit Testing
+# --------------------------------------------------------------------------- #
+
+
 @task
 def unittest(ctx):
     """ Run Unit Test """
     ctx.run(f"black tests/ {PACKAGE_NAME}/")
-    ctx.run("nosetests --with-coverage"
-            " --cover-package={} -v tests/unit/".format(PACKAGE_NAME.lower()))
+    ctx.run(
+        "nosetests --with-coverage"
+        " --cover-package={} -v tests/unit/".format(PACKAGE_NAME.lower())
+    )
+
 
 @task
 def funtest(ctx):
     """ Run Unit Test """
     ctx.run(f"black tests/ {PACKAGE_NAME}/")
-    ctx.run("nosetests --with-coverage"
-            " --cover-package={} -v tests/functional/".format(PACKAGE_NAME.lower()))
+    ctx.run(
+        "nosetests --with-coverage"
+        " --cover-package={} -v tests/functional/".format(PACKAGE_NAME.lower())
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Task Queue
+# --------------------------------------------------------------------------- #
+
+
+@task
+def task_engine(ctx):
+    """ Start Task Engine """
+    nproc = 4
+
+    ctx.run(f"huey_consumer -w {nproc} package.tasks.main.queue")
 
 
 # --------------------------------------------------------------------------- #
 # Version
 # --------------------------------------------------------------------------- #
+
 
 @task
 def bump(ctx):
