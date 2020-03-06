@@ -28,8 +28,10 @@
 # Imports
 # --------------------------------------------------------------------------- #
 
-# Framework
 import bottle
+import yaml
+from package.utils.utils import template
+
 
 # --------------------------------------------------------------------------- #
 # Application
@@ -37,10 +39,18 @@ import bottle
 
 app = bottle.Bottle()
 
-app.mount("/v1", bottle.load_app("package.v1:app"))
-app.mount("/v2", bottle.load_app("package.v2:app"))
+data = yaml.safe_load(open("spec.yml", mode="r").read())
 
-app.mount("/doc", bottle.load_app("package.doc:app"))
+
+@app.get("/")
+@template("doc")
+def doc():
+    return dict(name="project", url="/doc/spec")
+
+
+@app.get("/spec")
+def spec():
+    return data
 
 
 # --------------------------------------------------------------------------- #
